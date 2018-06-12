@@ -1,7 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
 module Data.Optic
-    (
-      Iso
+    ( Iso
     , Iso'
     , iso
     , from
