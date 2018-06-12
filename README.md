@@ -7,4 +7,5 @@ something more like https://hackage.haskell.org/package/lens.
 
 ## Additional Resources
 [profunctor package](https://hackage.haskell.org/package/profunctors-5.2)
+
 [Don't Fear the Profunctor Optics!](https://github.com/hablapps/DontFearTheProfunctorOptics)
