@@ -1,5 +1,5 @@
 {-# LANGUAGE RankNTypes #-}
-module Data.Optic
+module Data.Optic.Core
     ( Iso
     , Iso'
     , iso
