@@ -32,6 +32,14 @@ class Profunctor p => Strong p where
 
 -- == Concrete Profunctor types
 
+-- function instances
+instance Profunctor (->) where
+    dimap f h g = h . g . f
+
+instance Strong (->) where
+    first f = \(a, c) -> (f a, c)
+
+
 -- | A profunctor that ignores its first argument
 newtype Tagged a b = Tagged { unTagged :: b }
 
@@ -44,6 +52,9 @@ newtype Star f a b = Star { runStar :: a -> f b }
 
 instance Functor f => Profunctor (Star f) where
     dimap ab cd (Star f) = Star (fmap cd . f . ab)
+
+instance Functor f => Strong (Star f) where
+    first (Star f) = Star (\(a, c) -> (flip (,) c) <$> f a)
 
 
 -- | Lift a functor over the front of a function
