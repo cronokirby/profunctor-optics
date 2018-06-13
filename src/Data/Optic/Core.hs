@@ -10,6 +10,11 @@ module Data.Optic.Core
     , lens
     , view
     , update
+    , Prism
+    , Prism'
+    , prism
+    , match
+    , build
     )
 where
 
@@ -52,7 +57,7 @@ type Lens' s a = Lens s s a a
 
 -- | Construct a lens from a getter and setter
 lens :: (s -> a) -> (b -> s -> t) -> Lens s t a b
-lens get set = dimap (\s -> (s, s)) (uncurry set) . first . dimap get id
+lens gt st = dimap (\s -> (s, s)) (uncurry st) . first . dimap gt id
 
 -- | Use a lens to view a part of a structure
 view :: Lens s t a b -> (s -> a)
@@ -70,7 +75,6 @@ type Prism s t a b = forall p. Choice p => p a b -> p s t
 -- | A simplified prism type
 type Prism' s a = Prism s s a a
 
-
 -- | Construct a prism from a matcher, and a builder
 prism :: (s -> Either a t) -> (b -> t) -> Prism s t a b
 prism matcher builder = dimap matcher (either id id) . left . dimap id builder
@@ -81,4 +85,4 @@ match prsm = runStar (prsm (Star Left))
 
 -- | Build up a structure from one branch
 build :: Prism s t a b -> (b -> t)
-build pr = unTagged . pr . Tagged
+build prsm = unTagged . prsm . Tagged

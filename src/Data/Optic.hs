@@ -6,9 +6,13 @@ module Data.Optic
     , (.=)
     , over
     , (%=)
+    , (^?)
       -- Common stuff
     , _1
     , _2
+    , the
+    , _Left
+    , _Right
     , module Data.Optic.Core
     )
 where
@@ -46,11 +50,28 @@ infixr 4 %=
 (%=) = over
 
 
--- = Common lenses
+infixl 8 ^?
+-- | Try and view part of a structure
+(^?) :: s -> Prism s t a b -> Maybe a
+s ^? prsm = either Just (const Nothing) (match prsm s)
+
+
+
+-- = Common Optics
 
 _1 :: Lens (a, b) (c, b) a c
 _1 = lens fst (\c (_, b) -> (c, b))
 
-
 _2 :: Lens (b, a) (b, c) a c
 _2 = lens snd (\c (b, _) -> (b, c))
+
+
+the :: Prism (Maybe a) (Maybe b) a b
+the = prism (maybe (Right Nothing) Left) Just
+
+
+_Left :: Prism (Either a c) (Either b c) a b
+_Left = prism (fmap Right) Left
+
+_Right :: Prism (Either c a) (Either c b) a b
+_Right = prism (either (Right . Left) Left) Right

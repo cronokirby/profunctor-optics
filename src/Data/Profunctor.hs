@@ -68,7 +68,7 @@ instance Functor f => Strong (Star f) where
     first (Star f) = Star (\(a, c) -> (flip (,) c) <$> f a)
 
 instance Applicative f => Choice (Star f) where
-     left (Star f) = Star (either (fmap Left . f) (pure . Right))
+    left (Star f) = Star (either (fmap Left . f) (pure . Right))
 
 
 -- | Lift a functor over the front of a function
