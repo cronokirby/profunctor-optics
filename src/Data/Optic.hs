@@ -13,6 +13,7 @@ module Data.Optic
     , the
     , _Left
     , _Right
+    , ix
     , module Data.Optic.Core
     )
 where
@@ -34,7 +35,7 @@ s ^. l = view l s
 infixr 4 .=
 -- | Update a portion of a structure
 -- Equivalent to 'update'
-(.=) :: Lens s t a b -> b -> s -> t
+(.=) :: Optional s t a b -> b -> s -> t
 (.=) = update
 
 
@@ -52,8 +53,8 @@ infixr 4 %=
 
 infixl 8 ^?
 -- | Try and view part of a structure
-(^?) :: s -> Prism s t a b -> Maybe a
-s ^? prsm = either Just (const Nothing) (match prsm s)
+(^?) :: s -> Optional s t a b -> Maybe a
+s ^? prsm = either Just (const Nothing) (preview prsm s)
 
 
 
@@ -75,3 +76,14 @@ _Left = prism (fmap Right) Left
 
 _Right :: Prism (Either c a) (Either c b) a b
 _Right = prism (either (Right . Left) Left) Right
+
+
+ix :: Int -> Optional [a] [a] a a
+ix i = optional (\l -> maybe (Right l) Left $ safeGet i l) (set i)
+  where
+    safeGet _ []     = Nothing
+    safeGet 0 (x:xs) = Just x
+    safeGet i (x:xs) = safeGet (i - 1) xs
+    set _ _ []       = []
+    set 0 x (_:xs)   = x:xs
+    set i s (x:xs)   = x : set (i - 1) s xs

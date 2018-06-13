@@ -15,6 +15,10 @@ module Data.Optic.Core
     , prism
     , match
     , build
+    , Optional
+    , Optional'
+    , optional
+    , preview
     )
 where
 
@@ -64,7 +68,7 @@ view :: Lens s t a b -> (s -> a)
 view lns = getConstant . runStar (lns (Star Constant))
 
 -- | Use a lens to modify a part of a structure
-update :: Lens s t a b -> (b -> s -> t)
+update :: Optional s t a b -> (b -> s -> t)
 update lns = curry $ \(b, s) -> lns (const b) s
 
 
@@ -79,10 +83,28 @@ type Prism' s a = Prism s s a a
 prism :: (s -> Either a t) -> (b -> t) -> Prism s t a b
 prism matcher builder = dimap matcher (either id id) . left . dimap id builder
 
--- | Try and access a portion of a structure
+-- | Try and match a branch of a sum
 match :: Prism s t a b -> (s -> Either a t)
 match prsm = runStar (prsm (Star Left))
 
 -- | Build up a structure from one branch
 build :: Prism s t a b -> (b -> t)
 build prsm = unTagged . prsm . Tagged
+
+
+-- | A combination of a Lens and a Prism
+type Optional s t a b = forall p. (Strong p, Choice p) => p a b -> p s t
+
+-- | A simplified optional type
+type Optional' s a = Optional s s a a
+
+-- | Construct a prism from a partial getter, and a setter
+optional :: (s -> Either a t) -> (b -> s -> t) -> Optional s t a b
+optional p st = dimap preview' merge . left . dimap id (uncurry st) . first
+  where
+    preview' s = either (\a -> Left (a, s)) Right (p s)
+    merge = either id id
+
+-- | Try and access a portion of a structure
+preview :: Optional s t a b -> (s -> Either a t)
+preview prsm = runStar (prsm (Star Left))

@@ -48,6 +48,9 @@ instance Profunctor (->) where
 instance Strong (->) where
     first f = \(a, c) -> (f a, c)
 
+instance Choice (->) where
+    left f = either (Left . f) Right
+
 
 -- | A profunctor that ignores its first argument
 newtype Tagged a b = Tagged { unTagged :: b }
