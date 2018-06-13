@@ -14,6 +14,7 @@ module Data.Optic
     , _Left
     , _Right
     , ix
+    , _head
     , module Data.Optic.Core
     )
 where
@@ -87,3 +88,11 @@ ix i = optional (\l -> maybe (Right l) Left $ safeGet i l) (set i)
     set _ _ []       = []
     set 0 x (_:xs)   = x:xs
     set i s (x:xs)   = x : set (i - 1) s xs
+
+_head :: Optional [a] [a] a a
+_head = optional get set
+  where
+    get []    = Right []
+    get (x:_) = Left x
+    set b []     = []
+    set b (_:xs) = b:xs

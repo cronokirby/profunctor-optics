@@ -61,6 +61,7 @@ instance Profunctor Tagged where
 instance Choice Tagged where
     left (Tagged b) = Tagged (Left b)
 
+
 -- | Lift a functor over the back of a function
 newtype Star f a b = Star { runStar :: a -> f b }
 
