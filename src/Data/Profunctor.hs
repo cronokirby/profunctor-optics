@@ -2,6 +2,7 @@ module Data.Profunctor
     ( -- Classes
       Profunctor(..)
     , Strong(..)
+    , Choice(..)
       -- Profunctor types
     , Tagged(..)
     , Star(..)
@@ -30,6 +31,14 @@ class Profunctor p => Strong p where
     first :: p a b -> p (a, c) (b, c)
 
 
+-- | The dual to strong profunctors.
+-- Instead of running over one side of a product,
+-- they run over one side of a sum.
+class Profunctor p => Choice p where
+    left :: p a b -> p (Either a c) (Either b c)
+
+
+
 -- == Concrete Profunctor types
 
 -- function instances
@@ -46,6 +55,8 @@ newtype Tagged a b = Tagged { unTagged :: b }
 instance Profunctor Tagged where
     dimap _ f (Tagged b) = Tagged (f b)
 
+instance Choice Tagged where
+    left (Tagged b) = Tagged (Left b)
 
 -- | Lift a functor over the back of a function
 newtype Star f a b = Star { runStar :: a -> f b }
@@ -55,6 +66,9 @@ instance Functor f => Profunctor (Star f) where
 
 instance Functor f => Strong (Star f) where
     first (Star f) = Star (\(a, c) -> (flip (,) c) <$> f a)
+
+instance Applicative f => Choice (Star f) where
+     left (Star f) = Star (either (fmap Left . f) (pure . Right))
 
 
 -- | Lift a functor over the front of a function

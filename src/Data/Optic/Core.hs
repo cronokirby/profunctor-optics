@@ -61,3 +61,24 @@ view lns = getConstant . runStar (lns (Star Constant))
 -- | Use a lens to modify a part of a structure
 update :: Lens s t a b -> (b -> s -> t)
 update lns = curry $ \(b, s) -> lns (const b) s
+
+
+
+-- | Prism's allow accessing parts of a sum
+type Prism s t a b = forall p. Choice p => p a b -> p s t
+
+-- | A simplified prism type
+type Prism' s a = Prism s s a a
+
+
+-- | Construct a prism from a matcher, and a builder
+prism :: (s -> Either a t) -> (b -> t) -> Prism s t a b
+prism matcher builder = dimap matcher (either id id) . left . dimap id builder
+
+-- | Try and access a portion of a structure
+match :: Prism s t a b -> (s -> Either a t)
+match prsm = runStar (prsm (Star Left))
+
+-- | Build up a structure from one branch
+build :: Prism s t a b -> (b -> t)
+build pr = unTagged . pr . Tagged
